@@ -1,0 +1,65 @@
+Buat sistem distributed (microservice) berbasis HTTP API dengan pendekatan event-driven
+
+Konteks arsitektur:
+- Frontend hanya berkomunikasi dengan backend For FrontEnd
+- Authencation (login,refresh token, logout) ditangani sepenuhnya di BFF
+- User Service bertangggung Jawab
+   * Register User
+   * Penyimpanan dan pengelolaan data user
+   * Hashing passsword
+   * Validation unik (email / phone)
+- BFF Tidak mengandung business logic domain
+- Service lain Tidak boleh meng-issue token
+
+* Tect Stack *
+- Language: Go 1.25
+- Database PostgreSql 15+
+- Apache Kafka : https://github.com/apache/kafka (KRaft mode - NO ZOOKEEPER)
+- Dokcker + Docker Compose untuk containerzation 
+
+* Framework & Library
+- GoFiber (HTTP Framework) : https://github.com/gofiber/fiber
+- GORM (ORM) : https://github.com/go-gorm/gorm
+- Viper (Configuration) : https://github.com/spf13/viper
+- Golang Migrate (Database Migration) : https://github.com/golang-migrate/migrate
+- Go Playground Validator (Validation) : https://github.com/go-playground/validator
+- Logrus (Logger) : https://github.com/sirupsen/logrus
+- Kafka Golang : https://github.com/segmentio/kafka-go
+
+FLow register
+1. Frontend mengirim request POST / register ke BFF
+2. BFF meneruskan request ke User Service via Http
+3. User Service 
+   - Membuat user
+   - hashing password
+   - Menyimpan ke database
+   - Mem-publish event 'UserRegistered'
+4. Service lain akan berlangganan event tersebut
+
+FLow Login 
+1. Frontend mengirim request POST / login ke BFF
+2. BFF menvalidasi input
+3. BFF memanggil User service via http untuk verifikasi credential
+4. User service hanya mengembalikan hasil verifikasi 
+   * user_id
+   * role / scope
+   * status aktif
+5.  BFF menerbitkan JWT dan mengirim response k frontend
+
+
+Otorisasi
+- Setiap service melakukan verifikasi JWT secara mandiri
+- Service lain tidak boleh memanggil BFF untuk otorisasi
+- Authorization berbasis role dan scope
+- Public key JWT distribusikan ke semua service
+
+Batasan Penting
+- BFF tidak subscribe Kafka
+- Tidak ada share authentication state
+- Tidak ada business logic domain di BFF
+- Tidak ada direct service-to-service auth dependency
+
+
+
+
+

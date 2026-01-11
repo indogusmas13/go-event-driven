@@ -1,0 +1,22 @@
+database:
+  host: localhost
+  port: 5432
+  database: event_driven_db
+  username: postgres
+  password: postgres123
+  sslmode: disable
+
+kafka:
+  brokers:
+    - localhost:9092
+
+server:
+  port: 8080
+
+jwt:
+  secret: your-super-secret-jwt-key-change-in-production
+  expiration_hours: 24
+  refresh_expiration_days: 7
+
+services:
+  user_service_url: http://localhost:8081
