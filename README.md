@@ -1,8 +1,8 @@
 # Go Event-Driven Microservices
 
-Sistem distributed microservice berbasis HTTP API dengan pendekatan event-driven menggunakan Go 1.24.
+A distributed microservice system based on HTTP API with an event-driven approach using Go 1.24.
 
-## Arsitektur
+## Architecture
 
 ```
 ┌──────────────┐
@@ -25,11 +25,11 @@ Sistem distributed microservice berbasis HTTP API dengan pendekatan event-driven
 └──────────────────────┘
 ```
 
-- **Frontend**: Berkomunikasi hanya dengan Backend For Frontend (BFF)
-- **BFF**: Menangani authentication (login, refresh token, logout), rate limiting, tanpa business logic domain
-- **User Service**: Bertanggung jawab untuk register user, penyimpanan data user, hashing password, dan validasi unik
-- **Event Consumer**: Memproses event dari Kafka (UserRegistered, dll)
-- **Event-driven**: Menggunakan Apache Kafka untuk komunikasi antar service
+- **Frontend**: Communicates only with the Backend For Frontend (BFF)
+- **BFF**: Handles authentication (login, refresh token, logout), rate limiting, without domain business logic
+- **User Service**: Responsible for user registration, user data storage, password hashing, and uniqueness validation
+- **Event Consumer**: Processes events from Kafka (UserRegistered, etc.)
+- **Event-driven**: Uses Apache Kafka for inter-service communication
 
 ## Tech Stack
 
@@ -40,8 +40,8 @@ Sistem distributed microservice berbasis HTTP API dengan pendekatan event-driven
 
 ## Framework & Library
 
-| Library | Fungsi |
-|---------|--------|
+| Library | Purpose |
+|---------|---------|
 | GoFiber | HTTP Framework |
 | GORM | ORM |
 | Viper | Configuration Management |
@@ -56,23 +56,23 @@ Sistem distributed microservice berbasis HTTP API dengan pendekatan event-driven
 
 ### Prerequisites
 
-- Docker dan Docker Compose
-- Go 1.24+ (untuk development)
+- Docker and Docker Compose
+- Go 1.24+ (for development)
 
-### Setup dengan Docker
+### Setup with Docker
 
-1. Clone repository:
+1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd go-event-driven
 ```
 
-2. Build dan jalankan semua service:
+2. Build and run all services:
 ```bash
 docker-compose up --build
 ```
 
-3. Service akan tersedia di:
+3. Services will be available at:
    - BFF: http://localhost:8080
    - User Service: http://localhost:8081
    - PostgreSQL: localhost:5432
@@ -80,20 +80,20 @@ docker-compose up --build
 
 ### Rebuild Single Service
 
-Jika ada perubahan pada satu service, rebuild tanpa restart semua:
+If there are changes to a single service, rebuild without restarting all:
 
 ```bash
-# Rebuild BFF saja
+# Rebuild BFF only
 docker-compose up -d --no-deps --build bff
 
-# Rebuild User Service saja
+# Rebuild User Service only
 docker-compose up -d --no-deps --build user-service
 
-# Rebuild Event Consumer saja
+# Rebuild Event Consumer only
 docker-compose up -d --no-deps --build user-event-consumer
 ```
 
-### Setup untuk Development
+### Setup for Development
 
 1. Setup project:
 ```bash
@@ -105,12 +105,12 @@ make setup
 make dev
 ```
 
-3. Atau manual setup:
+3. Or manual setup:
 ```bash
 # Install dependencies
 go mod tidy
 
-# Start PostgreSQL dan Kafka
+# Start PostgreSQL and Kafka
 docker-compose up postgres kafka -d
 
 # Run migrations
@@ -218,7 +218,7 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 ```
 
 ### Rate Limit Response
-Ketika rate limit terlampaui:
+When rate limit is exceeded:
 ```json
 {
   "error": "Too many requests",
@@ -230,9 +230,9 @@ HTTP Status: `429 Too Many Requests`
 
 ## Configuration
 
-Project ini mendukung konfigurasi melalui file YAML dan environment variables.
+This project supports configuration through YAML files and environment variables.
 
-### File Konfigurasi
+### Configuration Files
 
 | File | Environment |
 |------|-------------|
@@ -242,7 +242,7 @@ Project ini mendukung konfigurasi melalui file YAML dan environment variables.
 
 ### Environment Variables
 
-Set `ENV` untuk memilih konfigurasi:
+Set `ENV` to select configuration:
 ```bash
 ENV=development  # configs/config.development.yaml
 ENV=production   # configs/config.production.yaml
@@ -271,33 +271,33 @@ ENV=docker       # configs/config.docker.yaml
 1. Frontend → POST /register → BFF
 2. BFF → User Service via HTTP
 3. User Service:
-   - Validasi email/phone unik
+   - Validate email/phone uniqueness
    - Hash password (bcrypt)
-   - Simpan ke database
-   - Publish event 'UserRegistered' ke Kafka
-4. Event Consumer menerima dan memproses event
+   - Save to database
+   - Publish 'UserRegistered' event to Kafka
+4. Event Consumer receives and processes the event
 ```
 
 ### User Login
 ```
 1. Frontend → POST /login → BFF
 2. BFF → User Service /verify-credentials
-3. User Service return {user_id, role, is_active, valid}
-4. BFF generate JWT tokens
-5. Response ke Frontend
+3. User Service returns {user_id, role, is_active, valid}
+4. BFF generates JWT tokens
+5. Response to Frontend
 ```
 
 ## Security Features
 
 ### Authentication & Authorization
-- **Password Hashing**: bcrypt dengan default cost
-- **JWT Access Token**: 1-24 jam expiry (configurable)
-- **JWT Refresh Token**: 1-7 hari expiry (configurable)
-- **Role-based Authorization**: admin, user, dll
+- **Password Hashing**: bcrypt with default cost
+- **JWT Access Token**: 1-24 hours expiry (configurable)
+- **JWT Refresh Token**: 1-7 days expiry (configurable)
+- **Role-based Authorization**: admin, user, etc.
 
 ### Rate Limiting
-| Endpoint | Limit | Tujuan |
-|----------|-------|--------|
+| Endpoint | Limit | Purpose |
+|----------|-------|---------|
 | `/api/v1/register` | 3 req/min | Prevent spam registration |
 | `/api/v1/auth/login` | 5 req/min | Prevent brute force |
 | `/api/v1/auth/refresh` | 10 req/min | Token refresh |
@@ -305,7 +305,7 @@ ENV=docker       # configs/config.docker.yaml
 | `/api/v1/protected/*` | 100 req/min | General API |
 
 ### Other Security
-- Input validation dengan go-playground/validator
+- Input validation with go-playground/validator
 - CORS support
 - Structured error responses
 
@@ -455,10 +455,10 @@ docker-compose logs -f user-event-consumer
 
 | Issue | Solution |
 |-------|----------|
-| Kafka connection failed | Pastikan Kafka running: `docker-compose ps kafka` |
+| Kafka connection failed | Make sure Kafka is running: `docker-compose ps kafka` |
 | Database connection failed | Check PostgreSQL: `docker-compose ps postgres` |
-| JWT validation failed | Periksa JWT_SECRET di config |
-| Rate limit hit | Tunggu 60 detik atau gunakan IP berbeda |
+| JWT validation failed | Check JWT_SECRET in config |
+| Rate limit hit | Wait 60 seconds or use a different IP |
 
 ### Debug Commands
 ```bash
